@@ -2,6 +2,21 @@ import streamlit as st
 import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import pickle
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+#Fungsi memuat model dan vectorizer
+
+def load_model_and_vectorizer():
+    with open('model.pkl','rb') as model_file, open('vectorizer.pkl','rb') as vectorizer_file:
+       model = pickle.load(model_file)
+       vectorizer = pickle.load(vectorizer_file)  
+    return model, vectorizer
+
+def predict_sentiment(model,vectorizer,review):
+    review_vectorized = vectorizer.transform([review])
+    prediction = model.predict(review_vectorized)
+    return prediction[0]
 
 ## Load Data
 def load_data():
@@ -28,6 +43,7 @@ def main() :
      "Dataset":":book:",
      "Model":":gear:",
      "Analisis Deskriptif":":bar_chart:",
+     "Klasifikasi Sentiment" :":memo:",
      "About":":balloon:"
      }
 
@@ -50,6 +66,13 @@ def main() :
         st.write("Analisis Deskriptif ")
         data =load_data()
         show_desriptive_analysis(data)
+    elif choice =="Klasifikasi Sentiment":
+        st.subheader("Klasifikasi Sentiment")
+        model, vectorizer = load_model_and_vectorizer()
+        review_input = st.text_area('masukan review produk')
+        if st.button('klasifikasi'):
+            sentiment = predict_sentiment(model,vectorizer,review_input)
+            st.write(f"Sentimen Prediksi: {sentiment}")
     elif choice =="About":
         st.subheader("About")
         st.write("About ")  
